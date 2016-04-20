@@ -33,7 +33,7 @@ img_channels = 3
 print('X_train shape:', X_train.shape)
 print(X_train.shape[0], 'train samples')
 #print(X_train.dtype)
-#print(X_test.shape[0], 'test samples')
+print(X_test.shape[0], 'test samples')
 X_val = X_train[40000:50000]
 y_val = y_train[40000:50000]
 X_train = X_train[0:40000]
@@ -86,7 +86,7 @@ X_val/=255
 #model = model_from_json(open('model.json').read())
 
 # load weights or train the model:
-WEIGHTS_FNAME = 'model_weights.h5'
+WEIGHTS_FNAME = 'weights.h5'
 if True and os.path.exists(WEIGHTS_FNAME):
     # Just change the True to false to force re-training
     model.load_weights(WEIGHTS_FNAME)
@@ -124,17 +124,22 @@ else:
                                    nb_worker=1)
 
         print(hist.history)
+    from keras.models import model_from_json
+    # save as JSON
+    json_string = model.to_json()
+    model = model_from_json(json_string)
+    model.save_weights('my_model_weights.h5')
 
 # visualize the imput image
 im_index = 5000
 X = X_train[im_index:im_index+1]
-print(X.shape)
+# print(X.shape)
 X = np.swapaxes(X,1,3)
 X = np.swapaxes(X,1,2)
 plt.figure(figsize=(10, 10))
 plt.suptitle('input image')
 plt.imshow(np.squeeze(X),interpolation='none')
-plt.show()
+# plt.show()
 
 # Visualize weights
 import tensorflow as tf
@@ -142,7 +147,7 @@ init = tf.initialize_all_variables()
 sess = tf.Session()
 sess.run(init)
 W = sess.run(model.layers[2].W)
-print("W shape : ", W.shape)
+print("weight shape : ", W.shape)
 
 fig, axs = plt.subplots(6,6,figsize=(10, 10))
 axs = axs.ravel()
@@ -152,50 +157,38 @@ for i in range(6*6):
 #    axs[i].set_axis_off()
     axs[i].axis('off')
 plt.suptitle('relu1 weights')
-plt.show()
+# plt.show()
 
+from util_functions import nice_imshow, make_mosaic
 # visualize the output layers
 convout1_f = K.function([model.layers[0].input], [model.layers[2].output]) 
 X = X_train[im_index:im_index+1]
 C1 = convout1_f([X])[0]
 C1 = np.squeeze(C1)
-print("C1 shape : ", C1.shape)
+# print("C1 shape : ", C1.shape)
 
+plt.figure()
 nice_imshow(plt.gca(), make_mosaic(C1, 6, 6), cmap=cm.binary)
 #plt.subplot(6,6,2); plt.axis('off'); plt.imshow(C1[0,:,:], cmap=cm.binary)
-plt.show()
+#plt.show()
 
 # Calculate test set score with Keras 
-#score = model.evaluate(X_test, Y_test, verbose=1)
-# print('Test score:', score[0])
-# print('Test accuracy:', score[1])
-#score = model.evaluate(X_test, y_test, batch_size=batch_size) 
+score = model.evaluate(X_test, Y_test, verbose=1)
+print('Test score:', score[0])
+print('Test accuracy:', score[1])
 
 # Calculate test set score manually after prediction 
-
-#print(model.predict(X_test[1:5]))
-#print(Y_test[1:5])
 Y_pred = model.predict(X_test)
-#print(Y_pred)
 # Convert one-hot to index
 y_pred = np.argmax(Y_pred, axis=1)
 print(y_pred)
 
 from sklearn.metrics import classification_report
 print(classification_report(y_test, y_pred))
-#predict1 = model.predict(X_test, batch_size=batch_size) 
-#print(predict1)
-# Or, 
-# Generate class probability predictions for the inputs samples batch by batch 
-# Returns a numpy array of probability predictions 
 
 predict  = model.predict_proba(X_test, batch_size=batch_size, verbose=1) 
-print(predict)
-# for predict_batch, y_batch in batches]) / nb_samples: mean squared error (MSE) 
-#score2 = np.sum([np.sqrt(np.mean(np.square(predict1 - y_test)))]) 
+#print(predict)
 
-
-import matplotlib.pyplot as plt
 from sklearn import svm, datasets
 from sklearn.metrics import roc_curve, auc
 from sklearn.cross_validation import train_test_split
@@ -232,9 +225,7 @@ roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
 ##############################################################################
 # Plot ROC curves for the multiclass problem
-
 # Compute macro-average ROC curve and ROC area
-
 # First aggregate all false positive rates
 all_fpr = np.unique(np.concatenate([fpr[i] for i in range(nb_classes)]))
 
@@ -263,20 +254,9 @@ plt.plot(fpr["macro"], tpr["macro"],
          linewidth=2)
 import pickle as pickle
 plot_name = 'sigmoid variation'
-pickle.dump(roc_auc,open('roc_auc'+plot_name+'.p','wb'))
-pickle.dump(fpr,open('fpr'+plot_name+'.p','wb'))
-pickle.dump(tpr,open('tpr'+plot_name+'.p','wb'))
-'''
-plt.plot([0, 1], [0, 1], 'k--')
-plt.xlim([0.0, 1.0])
-plt.ylim([0.0, 1.05])
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.title('Some extension of Receiver operating characteristic to multi-class')
-plt.legend(loc="lower right")
-plt.show()
-'''
-#plt.figure()
+pickle.dump(roc_auc,open('roc_auc_'+plot_name+'.p','wb'))
+pickle.dump(fpr,open('fpr_'+plot_name+'.p','wb'))
+pickle.dump(tpr,open('tpr_'+plot_name+'.p','wb'))
 for i in range(nb_classes):
     plt.plot(fpr[i], tpr[i], label='ROC curve of class {0} (area = {1:0.2f})'
                                    ''.format(i, roc_auc[i]))
@@ -291,7 +271,7 @@ plt.legend(loc="lower right")
 plt.show()
 
 
-##Confusion matrix
+# Plot Confusion matrix
 from sklearn.metrics import confusion_matrix
 category_names=['airplane','automobile','bird','cat','deer','dog','frog','horse','ship','truck']
 
@@ -326,5 +306,5 @@ def compute_confusion_matrix(y_test, y_pred, flag_plot, plot_title):
     accuracy = diag_sum/cm_normalized_sum
     return (cm, cm_normalized,accuracy)
 
-#plot_name = 'sigmoid variation'
+plot_name = 'model variation'
 result = compute_confusion_matrix(y_test, y_pred, 1, plot_name)
