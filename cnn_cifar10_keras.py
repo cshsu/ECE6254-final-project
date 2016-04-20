@@ -253,7 +253,7 @@ plt.plot(fpr["macro"], tpr["macro"],
                ''.format(roc_auc["macro"]),
          linewidth=2)
 import pickle as pickle
-plot_name = 'sigmoid variation'
+plot_name = 'no variation'
 pickle.dump(roc_auc,open('roc_auc_'+plot_name+'.p','wb'))
 pickle.dump(fpr,open('fpr_'+plot_name+'.p','wb'))
 pickle.dump(tpr,open('tpr_'+plot_name+'.p','wb'))
@@ -306,5 +306,4 @@ def compute_confusion_matrix(y_test, y_pred, flag_plot, plot_title):
     accuracy = diag_sum/cm_normalized_sum
     return (cm, cm_normalized,accuracy)
 
-plot_name = 'model variation'
 result = compute_confusion_matrix(y_test, y_pred, 1, plot_name)
