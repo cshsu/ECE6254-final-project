@@ -5,4 +5,4 @@ This is the repository for ECE6254 final project. It is also my first humble att
 What's included:  
 Secret...under construction
 
-Team members: Chia-Sheng Hsu, Mythili Vadali, Jingting Yao, Yi-Chi Shao
+Team members: [Chia-Sheng Hsu] (https://www.linkedin.com/in/chiasheng), Mythili Vadali, Jingting Yao, Yi-Chi Shao
