@@ -1,4 +1,7 @@
-#Train a simple deep CNN on the CIFAR10 small images dataset.
+# Train a simple deep CNN on the CIFAR10 small images dataset
+# using keras with tensorflow backend.
+# follow the logic flow of 
+# http://nbviewer.jupyter.org/github/julienr/ipynb_playground/blob/master/keras/convmnist/keras_cnn_mnist.ipynb
 
 from __future__ import print_function
 from keras.datasets import cifar10
@@ -31,13 +34,15 @@ img_channels = 3
 # the data, shuffled and split between train and test sets
 (X_train, y_train), (X_test, y_test) = cifar10.load_data()
 print('X_train shape:', X_train.shape)
-print(X_train.shape[0], 'train samples')
-#print(X_train.dtype)
-print(X_test.shape[0], 'test samples')
 X_val = X_train[40000:50000]
 y_val = y_train[40000:50000]
 X_train = X_train[0:40000]
 y_train = y_train[0:40000] 
+
+print(X_train.shape[0], 'train samples')
+print(X_val.shape[0], 'validation samples')
+print(X_test.shape[0], 'test samples')
+#print(X_train.dtype)
 
 # convert class vectors to binary class matrices
 Y_train = np_utils.to_categorical(y_train, nb_classes)
@@ -129,6 +134,7 @@ else:
     json_string = model.to_json()
     model = model_from_json(json_string)
     model.save_weights('my_model_weights.h5')
+    print('model weights saved.')
 
 # visualize the imput image
 im_index = 5000
@@ -141,12 +147,13 @@ plt.suptitle('input image')
 plt.imshow(np.squeeze(X),interpolation='none')
 # plt.show()
 
+layer_idx = 2
 # Visualize weights
 import tensorflow as tf
 init = tf.initialize_all_variables()
 sess = tf.Session()
 sess.run(init)
-W = sess.run(model.layers[2].W)
+W = sess.run(model.layers[layer_idx].W)
 print("weight shape : ", W.shape)
 
 fig, axs = plt.subplots(6,6,figsize=(10, 10))
@@ -161,13 +168,14 @@ plt.suptitle('relu1 weights')
 
 from util_functions import nice_imshow, make_mosaic
 # visualize the output layers
-convout1_f = K.function([model.layers[0].input], [model.layers[2].output]) 
+convout1_f = K.function([model.layers[0].input], [model.layers[layer_idx].output]) 
 X = X_train[im_index:im_index+1]
 C1 = convout1_f([X])[0]
 C1 = np.squeeze(C1)
 # print("C1 shape : ", C1.shape)
 
-plt.figure()
+plt.figure(figsize=(10, 10))
+plt.suptitle('relu1 output')
 nice_imshow(plt.gca(), make_mosaic(C1, 6, 6), cmap=cm.binary)
 #plt.subplot(6,6,2); plt.axis('off'); plt.imshow(C1[0,:,:], cmap=cm.binary)
 #plt.show()
