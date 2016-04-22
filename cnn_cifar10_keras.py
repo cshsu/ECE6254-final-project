@@ -1,10 +1,10 @@
-# Train a simple deep CNN on the CIFAR10 small images dataset
+## Train a very deep Convolutional Neural Network for classification of CIFAR10 small images
 # using keras with tensorflow backend.
-# cifar-10: Learning Multiple Layers of Features from Tiny Images, Alex
-# Krizhevsky, 2009.
-# tensorflow: TensorFlow: Large-scale machine learning on heterogeneous systems
+# Very Deep Convolutional Networks for Large-Scale Image Recognition, K. Simonyan, A. Zisserman, 2014
+# cifar-10: Learning Multiple Layers of Features from Tiny Images, Alex Krizhevsky, 2009.
+# TensorFlow: Large-scale machine learning on heterogeneous systems
 # keras: https://github.com/fchollet/keras
-# follow the logic flow of 
+# follow the logic flow of a Jupyter Notebook 
 # http://nbviewer.jupyter.org/github/julienr/ipynb_playground/blob/master/keras/convmnist/keras_cnn_mnist.ipynb
 
 from __future__ import print_function
